@@ -12,13 +12,17 @@ import jp.s5r.android.imagesearch.model.ResultModel;
 import jp.s5r.android.imagesearch.util.ImageUtil;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.GridView;
 import android.widget.SearchView;
@@ -38,13 +42,15 @@ public class ImageGridFragment
   private boolean mIsIntentMode;
   private File mCacheDir;
 
-  @InjectView(R.id.grid)
-  GridView mGridView;
-
   private boolean mIsLoading;
   private boolean mHasNext;
   private String mCurrentQuery;
   private int mNextStart;
+
+  private ProgressDialogFragment mProgressDialog;
+
+  @InjectView(R.id.grid)
+  GridView mGridView;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -101,9 +107,15 @@ public class ImageGridFragment
 
   @Override
   public boolean onQueryTextSubmit(String query) {
+    hideSoftKeyboard();
+
     mAdapter.clear();
     mCurrentQuery = query;
     mNextStart = 0;
+
+    mProgressDialog = new ProgressDialogFragment();
+    mProgressDialog.show(getFragmentManager(), "dialog");
+
     loadItems();
     return true;
   }
@@ -116,6 +128,11 @@ public class ImageGridFragment
   @Override
   public void onResponse(ResponseModel response) {
     mIsLoading = false;
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+      hideSoftKeyboard();
+    }
 
     ResponseDataModel responseData = response.getResponseData();
     if (responseData != null) {
@@ -143,10 +160,15 @@ public class ImageGridFragment
 
   @Override
   public void onItemClick(ResultModel result) {
-    asyncDownloadImage(result.getUrl());
+    if (mIsIntentMode) {
+      asyncDownloadImage(result.getUrl());
+    }
   }
 
   private void asyncDownloadImage(String uri) {
+    mProgressDialog = new ProgressDialogFragment();
+    mProgressDialog.show(getFragmentManager(), "dialog");
+
     ImageLoader.getInstance().loadImage(
       uri,
       new SimpleImageLoadingListener() {
@@ -158,6 +180,11 @@ public class ImageGridFragment
   }
 
   private void onDownloadComplete(Bitmap bitmap) {
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+    }
+
     File path = new File(mCacheDir, System.currentTimeMillis() + ".jpg");
     try {
       ImageUtil.saveImage(path, bitmap);
@@ -184,5 +211,17 @@ public class ImageGridFragment
     if (isLastItemVisible && !mIsLoading && mHasNext) {
       loadItems();
     }
+  }
+
+  private void hideSoftKeyboard() {
+    new Handler(Looper.getMainLooper()).post(new Runnable() {
+      @Override
+      public void run() {
+        InputMethodManager inputMethodManager =
+          (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(), 0);
+        mGridView.requestFocus();
+      }
+    });
   }
 }
