@@ -5,6 +5,8 @@ import butterknife.InjectView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import jp.s5r.android.imagesearch.api.ImageSearchApi;
+import jp.s5r.android.imagesearch.model.CursorModel;
+import jp.s5r.android.imagesearch.model.ResponseDataModel;
 import jp.s5r.android.imagesearch.model.ResponseModel;
 import jp.s5r.android.imagesearch.model.ResultModel;
 import jp.s5r.android.imagesearch.util.ImageUtil;
@@ -17,6 +19,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.GridView;
 import android.widget.SearchView;
 
@@ -27,7 +30,8 @@ public class ImageGridFragment
   extends BaseFragment
   implements SearchView.OnQueryTextListener,
              ImageSearchApi.OnResponseListener,
-             ImageGridAdapter.OnItemClickListener {
+             ImageGridAdapter.OnItemClickListener,
+             AbsListView.OnScrollListener {
 
   private ImageSearchApi mImageSearchApi;
   private ImageGridAdapter mAdapter;
@@ -36,6 +40,11 @@ public class ImageGridFragment
 
   @InjectView(R.id.grid)
   GridView mGridView;
+
+  private boolean mIsLoading;
+  private boolean mHasNext;
+  private String mCurrentQuery;
+  private int mNextStart;
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,6 +66,7 @@ public class ImageGridFragment
     mAdapter = new ImageGridAdapter(getActivity());
     mAdapter.setOnItemClickListener(this);
     mGridView.setAdapter(mAdapter);
+    mGridView.setOnScrollListener(this);
     mImageSearchApi = new ImageSearchApi();
     mImageSearchApi.setOnResponseListener(this);
 
@@ -91,15 +101,38 @@ public class ImageGridFragment
 
   @Override
   public boolean onQueryTextSubmit(String query) {
-    mImageSearchApi.search(query);
-    return false;
+    mAdapter.clear();
+    mCurrentQuery = query;
+    mNextStart = 0;
+    loadItems();
+    return true;
+  }
+
+  private synchronized void loadItems() {
+    mIsLoading = true;
+    mImageSearchApi.search(mCurrentQuery, mNextStart);
   }
 
   @Override
   public void onResponse(ResponseModel response) {
-    if (mAdapter != null) {
-      mAdapter.addAll(response.getResponseData().getResults());
-      mAdapter.notifyDataSetChanged();
+    mIsLoading = false;
+
+    ResponseDataModel responseData = response.getResponseData();
+    if (responseData != null) {
+      CursorModel cursor = responseData.getCursor();
+      if ((cursor.getPages().size() * 8) > mNextStart) {
+        mHasNext = true;
+        mNextStart += 8;
+      } else {
+        mHasNext = false;
+      }
+
+      if (mAdapter != null) {
+        mAdapter.addAll(responseData.getResults());
+        mAdapter.notifyDataSetChanged();
+      }
+    } else {
+      mHasNext = false;
     }
   }
 
@@ -138,6 +171,18 @@ public class ImageGridFragment
 
     if (mIsIntentMode) {
       getActivity().finish();
+    }
+  }
+
+  @Override
+  public void onScrollStateChanged(AbsListView view, int scrollState) {
+  }
+
+  @Override
+  public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+    boolean isLastItemVisible = totalItemCount == firstVisibleItem + visibleItemCount;
+    if (isLastItemVisible && !mIsLoading && mHasNext) {
+      loadItems();
     }
   }
 }

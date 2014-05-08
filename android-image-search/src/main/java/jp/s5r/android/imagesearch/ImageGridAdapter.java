@@ -49,6 +49,13 @@ public class ImageGridAdapter extends BaseAdapter {
     mResultList.addAll(results);
   }
 
+  public void clear() {
+    if (mResultList == null) {
+      mResultList = new ArrayList<ResultModel>();
+    }
+    mResultList.clear();
+  }
+
   @Override
   public int getCount() {
     if (mResultList != null) {
@@ -88,6 +95,15 @@ public class ImageGridAdapter extends BaseAdapter {
     view.setLayoutParams(params);
 
     final ResultModel item = getItem(position);
+
+    Object o = holder.image.getTag();
+    if (o != null && o instanceof String) {
+      String viewUri = (String) o;
+      if (!viewUri.equals(item.getTbUrl())) {
+        holder.image.setImageBitmap(null);
+      }
+    }
+    holder.image.setTag(item.getTbUrl());
     ImageLoader.getInstance().displayImage(item.getTbUrl(), holder.image);
     view.setOnClickListener(new View.OnClickListener() {
       @Override

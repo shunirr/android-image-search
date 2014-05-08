@@ -6,6 +6,7 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import jp.s5r.android.imagesearch.model.ResponseModel;
 
 import android.net.Uri;
+import android.util.Log;
 
 public class ImageSearchApi {
 
@@ -45,8 +46,16 @@ public class ImageSearchApi {
   public void search(String query, int start) {
     String uri = buildUri(query, start);
     mAsyncHttpClient.get(uri, new AsyncHttpResponseHandler() {
+
+      @Override
+      public void onStart() {
+        super.onStart();
+        Log.d("ImageSearch", "Request: " + getRequestURI().toString());
+      }
+
       @Override
       public void onSuccess(String content) {
+        super.onSuccess(content);
         ResponseModel response = mGson.fromJson(content, ResponseModel.class);
         if (response != null && mOnResponseListener != null) {
           mOnResponseListener.onResponse(response);
@@ -61,11 +70,9 @@ public class ImageSearchApi {
       .authority(HOST)
       .path(PATH);
 
-    String encodedQuery = Uri.encode(query);
-
     builder.appendQueryParameter(PARAM_VERSION, API_VERSION);
     builder.appendQueryParameter(PARAM_COUNT, DEFAULT_COUNT);
-    builder.appendQueryParameter(PARAM_QUERY, encodedQuery);
+    builder.appendQueryParameter(PARAM_QUERY, query);
     if (start > 0) {
       builder.appendQueryParameter(PARAM_START, String.valueOf(start));
     }
