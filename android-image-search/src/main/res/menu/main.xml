@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="jp.s5r.android.imagesearch.MainActivity" >
+    
+    <item android:id="@+id/menu_search"
+          android:title="Search"
+          android:icon="@android:drawable/ic_menu_search"
+          android:showAsAction="always"
+          android:actionViewClass="android.widget.SearchView" />
+
+</menu>
