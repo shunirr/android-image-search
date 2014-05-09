@@ -1,4 +1,4 @@
-package jp.s5r.android.imagesearch.api.model;
+package jp.s5r.android.imagesearch.model;
 
 import jp.s5r.android.imagesearch.api.googleimage.model.ResultModel;
 import jp.s5r.android.imagesearch.api.tiqav.model.TiqavImageModel;

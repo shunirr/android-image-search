@@ -4,7 +4,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResultModel;
-import jp.s5r.android.imagesearch.api.model.ImageModel;
+import jp.s5r.android.imagesearch.model.ImageModel;
 import jp.s5r.android.imagesearch.api.tiqav.model.TiqavImageModel;
 import jp.s5r.android.imagesearch.util.DisplayUtil;
 

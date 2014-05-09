@@ -8,4 +8,8 @@
           android:showAsAction="always"
           android:actionViewClass="android.widget.SearchView" />
 
+    <item android:id="@+id/menu_config"
+          android:title="Config"
+          android:icon="@android:drawable/ic_menu_preferences"
+          android:showAsAction="always" />
 </menu>

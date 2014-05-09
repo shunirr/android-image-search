@@ -9,7 +9,7 @@ import jp.s5r.android.imagesearch.api.googleimage.GoogleImageSearchApi;
 import jp.s5r.android.imagesearch.api.googleimage.model.CursorModel;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseDataModel;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseModel;
-import jp.s5r.android.imagesearch.api.model.ImageModel;
+import jp.s5r.android.imagesearch.model.ImageModel;
 import jp.s5r.android.imagesearch.api.tiqav.TiqavApi;
 import jp.s5r.android.imagesearch.api.tiqav.model.TiqavImageModel;
 import jp.s5r.android.imagesearch.util.ImageUtil;
@@ -75,9 +75,21 @@ public class ImageGridFragment
     ButterKnife.reset(this);
   }
 
+  private void initCacheDir() {
+    File cacheDir = getActivity().getExternalCacheDir();
+    if (!cacheDir.exists()) {
+      cacheDir.mkdirs();
+    }
+    mCacheDir = cacheDir;
+  }
+
   @Override
-  public void onActivityCreated(Bundle savedInstanceState) {
-    super.onActivityCreated(savedInstanceState);
+  public void onResume() {
+    super.onResume();
+
+    mNextStart = 0;
+    mIsLoadTiqav = false;
+    mHasNext = false;
 
     mAdapter = new ImageGridAdapter(getActivity());
     mAdapter.setOnItemClickListener(this);
@@ -89,20 +101,11 @@ public class ImageGridFragment
     mTiqavApi = new TiqavApi();
     mTiqavApi.setOnTiqavResponseListener(this);
 
-
     initCacheDir();
   }
 
-  private void initCacheDir() {
-    File cacheDir = getActivity().getExternalCacheDir();
-    if (!cacheDir.exists()) {
-      cacheDir.mkdirs();
-    }
-    mCacheDir = cacheDir;
-  }
-
   @Override
-  public void onDestroy() {
+  public void onPause() {
     mAdapter = null;
     if (mGridView != null) {
       mGridView.setAdapter(null);
@@ -116,7 +119,7 @@ public class ImageGridFragment
       mTiqavApi = null;
     }
 
-    super.onDestroy();
+    super.onPause();
   }
 
   public void setIntentMode(boolean value) {

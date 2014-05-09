@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="General">
+        <CheckBoxPreference
+            android:key="prefs_use_tiqav"
+            android:title="Use Tiqav"
+            />
+        <CheckBoxPreference
+            android:key="prefs_save_gallery"
+            android:title="Save Gallery"
+            />
+    </PreferenceCategory>
+</PreferenceScreen>

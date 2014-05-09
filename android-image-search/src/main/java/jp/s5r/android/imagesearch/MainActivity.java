@@ -2,6 +2,7 @@ package jp.s5r.android.imagesearch;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SearchView;
@@ -17,9 +18,7 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
 
     if (savedInstanceState == null) {
       mFragment = new ImageGridFragment();
-      getFragmentManager().beginTransaction()
-        .add(R.id.container, mFragment)
-        .commit();
+      addFragment(mFragment);
     }
 
     Intent intent = getIntent();
@@ -29,6 +28,20 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
           mFragment.setIntentMode(true);
         }
       }
+    }
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    switch (item.getItemId()) {
+    case R.id.menu_config:
+      popToTop();
+      pushFragment(new ConfigFragment());
+      return true;
+
+    default:
+      popToTop();
+      return super.onOptionsItemSelected(item);
     }
   }
 
@@ -57,9 +70,20 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
   }
 
   @Override
-  public boolean onQueryTextSubmit(String query) {
-    if (mFragment != null) {
-      return mFragment.onQueryTextSubmit(query);
+  public boolean onQueryTextSubmit(final String query) {
+    if (popToTop()) {
+      new Handler(getMainLooper()).postDelayed(new Runnable() {
+        @Override
+        public void run() {
+          if (mFragment != null) {
+            mFragment.onQueryTextSubmit(query);
+          }
+        }
+      }, 100);
+    } else {
+      if (mFragment != null) {
+        return mFragment.onQueryTextSubmit(query);
+      }
     }
     return false;
   }
