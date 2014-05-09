@@ -57,7 +57,12 @@ public class ImageGridAdapter extends BaseAdapter {
     if (mImageList == null) {
       mImageList = new ArrayList<ImageModel>();
     }
+    int count = 0;
     for (TiqavImageModel result : results) {
+      if (count >= 8) {
+        break;
+      }
+      count++;
       mImageList.add(new ImageModel(result));
     }
   }
