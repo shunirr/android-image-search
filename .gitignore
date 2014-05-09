@@ -180,3 +180,4 @@ tramp
 # elpa packages
 /elpa/
 
+*.keystore
