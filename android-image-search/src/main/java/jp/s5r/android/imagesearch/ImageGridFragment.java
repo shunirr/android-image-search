@@ -9,9 +9,10 @@ import jp.s5r.android.imagesearch.api.googleimage.GoogleImageSearchApi;
 import jp.s5r.android.imagesearch.api.googleimage.model.CursorModel;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseDataModel;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseModel;
-import jp.s5r.android.imagesearch.model.ImageModel;
 import jp.s5r.android.imagesearch.api.tiqav.TiqavApi;
 import jp.s5r.android.imagesearch.api.tiqav.model.TiqavImageModel;
+import jp.s5r.android.imagesearch.model.ImageModel;
+import jp.s5r.android.imagesearch.util.Config;
 import jp.s5r.android.imagesearch.util.ImageUtil;
 import jp.s5r.android.imagesearch.util.IntentUtil;
 
@@ -21,6 +22,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
@@ -76,7 +78,7 @@ public class ImageGridFragment
   }
 
   private void initCacheDir() {
-    File cacheDir = getActivity().getExternalCacheDir();
+    File cacheDir = new File(Environment.getExternalStorageDirectory(), "Pictures/ImageSearch/");
     if (!cacheDir.exists()) {
       cacheDir.mkdirs();
     }
@@ -84,8 +86,8 @@ public class ImageGridFragment
   }
 
   @Override
-  public void onResume() {
-    super.onResume();
+  public void onStart() {
+    super.onStart();
 
     mNextStart = 0;
     mIsLoadTiqav = false;
@@ -105,7 +107,7 @@ public class ImageGridFragment
   }
 
   @Override
-  public void onPause() {
+  public void onStop() {
     mAdapter = null;
     if (mGridView != null) {
       mGridView.setAdapter(null);
@@ -119,7 +121,7 @@ public class ImageGridFragment
       mTiqavApi = null;
     }
 
-    super.onPause();
+    super.onStop();
   }
 
   public void setIntentMode(boolean value) {
@@ -144,10 +146,10 @@ public class ImageGridFragment
 
   private synchronized void loadItems() {
     mIsLoading = true;
-    if (mIsLoadTiqav) {
-      mGoogleImageSearchApi.search(mCurrentQuery, mNextStart);
-    } else {
+    if (Config.useTiqav(getActivity()) && !mIsLoadTiqav) {
       mTiqavApi.search(mCurrentQuery);
+    } else {
+      mGoogleImageSearchApi.search(mCurrentQuery, mNextStart);
     }
   }
 
@@ -231,12 +233,17 @@ public class ImageGridFragment
     File path = new File(mCacheDir, System.currentTimeMillis() + ".jpg");
     try {
       ImageUtil.saveImage(path, bitmap);
+      Uri uri = Uri.fromFile(path);
+      if (Config.saveGallery(getActivity())) {
+        uri = ImageUtil.addGarally(getActivity(), path);
+      }
+
       if (mIsIntentMode) {
         Intent intent = new Intent();
-        intent.setData(Uri.fromFile(path));
+        intent.setData(uri);
         getActivity().setResult(Activity.RESULT_OK, intent);
       } else {
-        IntentUtil.shareImage(getActivity(), path);
+        IntentUtil.shareImage(getActivity(), uri);
       }
     } catch (IOException ignored) {}
 
