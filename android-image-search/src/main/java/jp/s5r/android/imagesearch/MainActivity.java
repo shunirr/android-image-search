@@ -1,11 +1,15 @@
 package jp.s5r.android.imagesearch;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.SearchView;
+
+import java.io.File;
 
 public class MainActivity extends BaseActivity implements SearchView.OnQueryTextListener {
 
@@ -22,11 +26,17 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
     }
 
     Intent intent = getIntent();
-    if (intent != null) {
-      if (Intent.ACTION_PICK.equals(intent.getAction()) || Intent.ACTION_GET_CONTENT.equals(intent.getAction())) {
-        if (mFragment != null) {
-          mFragment.setIntentMode(true);
+    if (intent != null && mFragment != null) {
+      String a = intent.getAction();
+      if (Intent.ACTION_PICK.equals(a) || Intent.ACTION_GET_CONTENT.equals(a)) {
+        mFragment.setIntentPickerMode(true);
+      } else if (MediaStore.ACTION_IMAGE_CAPTURE.equals(a)) {
+        Uri saveFileUri = intent.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
+        File saveFile = null;
+        if (saveFileUri != null) {
+          saveFile = new File(saveFileUri.getPath());
         }
+        mFragment.setIntentCaptureMode(true, saveFile);
       }
     }
   }

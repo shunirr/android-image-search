@@ -50,8 +50,10 @@ public class ImageGridFragment
   private TiqavApi mTiqavApi;
 
   private ImageGridAdapter mAdapter;
-  private boolean mIsIntentMode;
+  private boolean mIsIntentPickerMode;
+  private boolean mIsIntentCaptureMode;
   private File mCacheDir;
+  private File mSaveFile;
 
   private boolean mIsLoading;
   private boolean mHasNext;
@@ -124,8 +126,15 @@ public class ImageGridFragment
     super.onStop();
   }
 
-  public void setIntentMode(boolean value) {
-    mIsIntentMode = value;
+  public void setIntentPickerMode(boolean value) {
+    mIsIntentCaptureMode = false;
+    mIsIntentPickerMode = value;
+  }
+
+  public void setIntentCaptureMode(boolean value, File saveFile) {
+    mIsIntentPickerMode = false;
+    mIsIntentCaptureMode = value;
+    mSaveFile = saveFile;
   }
 
   @Override
@@ -231,6 +240,9 @@ public class ImageGridFragment
     }
 
     File path = new File(mCacheDir, System.currentTimeMillis() + ".jpg");
+    if (mIsIntentCaptureMode && mSaveFile != null) {
+      path = mSaveFile;
+    }
     try {
       ImageUtil.saveImage(path, bitmap);
       Uri uri = Uri.fromFile(path);
@@ -238,16 +250,24 @@ public class ImageGridFragment
         uri = ImageUtil.addGarally(getActivity(), path);
       }
 
-      if (mIsIntentMode) {
+      if (mIsIntentPickerMode) {
         Intent intent = new Intent();
         intent.setData(uri);
         getActivity().setResult(Activity.RESULT_OK, intent);
+      } else if (mIsIntentCaptureMode) {
+        if (mSaveFile == null) {
+          Intent intent = new Intent();
+          intent.putExtra("data", bitmap);
+          getActivity().setResult(Activity.RESULT_OK, intent);
+        } else {
+          getActivity().setResult(Activity.RESULT_OK);
+        }
       } else {
         IntentUtil.shareImage(getActivity(), uri);
       }
     } catch (IOException ignored) {}
 
-    if (mIsIntentMode) {
+    if (mIsIntentPickerMode || mIsIntentCaptureMode) {
       getActivity().finish();
     }
   }
