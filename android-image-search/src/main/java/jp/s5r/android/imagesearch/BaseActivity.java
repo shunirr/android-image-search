@@ -41,7 +41,7 @@ public class BaseActivity extends Activity {
     if (getFragmentManager().getBackStackEntryCount() > 1) {
       popFragment();
     } else {
-      super.onBackPressed();
+      finish();
     }
   }
 }
