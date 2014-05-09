@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="#CCCCCC"
     android:padding="1px"
     >
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#e2e2e6"
+        />
 
     <ImageView
         android:id="@+id/grid_item_image"
@@ -16,4 +21,4 @@
         android:scaleType="centerCrop"
         />
 
-</LinearLayout>
+</FrameLayout>
