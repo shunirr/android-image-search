@@ -3,7 +3,9 @@ package jp.s5r.android.imagesearch;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import jp.s5r.android.imagesearch.model.ResultModel;
+import jp.s5r.android.imagesearch.api.googleimage.model.ResultModel;
+import jp.s5r.android.imagesearch.api.model.ImageModel;
+import jp.s5r.android.imagesearch.api.tiqav.model.TiqavImageModel;
 import jp.s5r.android.imagesearch.util.DisplayUtil;
 
 import android.app.Activity;
@@ -23,11 +25,11 @@ public class ImageGridAdapter extends BaseAdapter {
   private final LayoutInflater mInflater;
   private final int mItemWidth;
 
-  private List<ResultModel> mResultList;
+  private List<ImageModel> mImageList;
   private OnItemClickListener mOnItemClickListener;
 
   public interface OnItemClickListener {
-    void onItemClick(ResultModel item);
+    void onItemClick(ImageModel item);
   }
 
   public ImageGridAdapter(Activity context) {
@@ -42,32 +44,43 @@ public class ImageGridAdapter extends BaseAdapter {
     mOnItemClickListener = onItemClickListener;
   }
 
-  public void addAll(List<ResultModel> results) {
-    if (mResultList == null) {
-      mResultList = new ArrayList<ResultModel>();
+  public void addGoogleImages(List<ResultModel> results) {
+    if (mImageList == null) {
+      mImageList = new ArrayList<ImageModel>();
     }
-    mResultList.addAll(results);
+    for (ResultModel result : results) {
+      mImageList.add(new ImageModel(result));
+    }
+  }
+
+  public void addTiqavImages(List<TiqavImageModel> results) {
+    if (mImageList == null) {
+      mImageList = new ArrayList<ImageModel>();
+    }
+    for (TiqavImageModel result : results) {
+      mImageList.add(new ImageModel(result));
+    }
   }
 
   public void clear() {
-    if (mResultList == null) {
-      mResultList = new ArrayList<ResultModel>();
+    if (mImageList == null) {
+      mImageList = new ArrayList<ImageModel>();
     }
-    mResultList.clear();
+    mImageList.clear();
   }
 
   @Override
   public int getCount() {
-    if (mResultList != null) {
-      return mResultList.size();
+    if (mImageList != null) {
+      return mImageList.size();
     }
     return 0;
   }
 
   @Override
-  public ResultModel getItem(int position) {
-    if (mResultList != null) {
-      return mResultList.get(position);
+  public ImageModel getItem(int position) {
+    if (mImageList != null) {
+      return mImageList.get(position);
     }
     return null;
   }
@@ -94,17 +107,17 @@ public class ImageGridAdapter extends BaseAdapter {
     params.height = mItemWidth;
     view.setLayoutParams(params);
 
-    final ResultModel item = getItem(position);
+    final ImageModel item = getItem(position);
 
     Object o = holder.image.getTag();
     if (o != null && o instanceof String) {
       String viewUri = (String) o;
-      if (!viewUri.equals(item.getTbUrl())) {
+      if (!viewUri.equals(item.getThumbnailUrl())) {
         holder.image.setImageBitmap(null);
       }
     }
-    holder.image.setTag(item.getTbUrl());
-    ImageLoader.getInstance().displayImage(item.getTbUrl(), holder.image);
+    holder.image.setTag(item.getThumbnailUrl());
+    ImageLoader.getInstance().displayImage(item.getThumbnailUrl(), holder.image);
     view.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {

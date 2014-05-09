@@ -1,14 +1,13 @@
-package jp.s5r.android.imagesearch.api;
+package jp.s5r.android.imagesearch.api.googleimage;
 
-import com.google.gson.Gson;
-import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import jp.s5r.android.imagesearch.model.ResponseModel;
+import jp.s5r.android.imagesearch.api.BaseApi;
+import jp.s5r.android.imagesearch.api.googleimage.model.ResponseModel;
 
 import android.net.Uri;
 import android.util.Log;
 
-public class ImageSearchApi {
+public class GoogleImageSearchApi extends BaseApi {
 
   private static String API_VERSION = "1.0";
   private static String DEFAULT_COUNT = "8";
@@ -21,33 +20,30 @@ public class ImageSearchApi {
   private static String PARAM_QUERY = "q";
   private static String PARAM_START = "start";
 
-  private final AsyncHttpClient mAsyncHttpClient;
-  private final Gson mGson;
+  private OnGoogleImageResponseListener mOnGoogleImageResponseListener;
 
-  private OnResponseListener mOnResponseListener;
+  public interface OnGoogleImageResponseListener {
+    void onGoogleImageResponse(ResponseModel response);
 
-  public interface OnResponseListener {
-    void onResponse(ResponseModel response);
-
-    void onFailure();
+    void onGoogleImageFailure();
   }
 
-  public ImageSearchApi() {
-    mAsyncHttpClient = new AsyncHttpClient();
-    mGson = new Gson();
+  public GoogleImageSearchApi() {
+    super();
   }
 
-  public void setOnResponseListener(OnResponseListener onResponseListener) {
-    mOnResponseListener = onResponseListener;
+  public void setOnGoogleImageResponseListener(OnGoogleImageResponseListener onGoogleImageResponseListener) {
+    mOnGoogleImageResponseListener = onGoogleImageResponseListener;
   }
 
+  @Override
   public void search(String query) {
     search(query, 0);
   }
 
   public void search(String query, int start) {
     String uri = buildUri(query, start);
-    mAsyncHttpClient.get(uri, new AsyncHttpResponseHandler() {
+    getAsyncHttpClient().get(uri, new AsyncHttpResponseHandler() {
 
       @Override
       public void onStart() {
@@ -58,17 +54,17 @@ public class ImageSearchApi {
       @Override
       public void onSuccess(String content) {
         super.onSuccess(content);
-        ResponseModel response = mGson.fromJson(content, ResponseModel.class);
-        if (response != null && mOnResponseListener != null) {
-          mOnResponseListener.onResponse(response);
+        ResponseModel response = getGson().fromJson(content, ResponseModel.class);
+        if (response != null && mOnGoogleImageResponseListener != null) {
+          mOnGoogleImageResponseListener.onGoogleImageResponse(response);
         }
       }
 
       @Override
       public void onFailure(Throwable error) {
         super.onFailure(error);
-        if (mOnResponseListener != null) {
-          mOnResponseListener.onFailure();
+        if (mOnGoogleImageResponseListener != null) {
+          mOnGoogleImageResponseListener.onGoogleImageFailure();
         }
       }
     });

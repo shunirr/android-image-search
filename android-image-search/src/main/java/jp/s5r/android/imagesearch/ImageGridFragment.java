@@ -5,11 +5,13 @@ import butterknife.InjectView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
-import jp.s5r.android.imagesearch.api.ImageSearchApi;
-import jp.s5r.android.imagesearch.model.CursorModel;
-import jp.s5r.android.imagesearch.model.ResponseDataModel;
-import jp.s5r.android.imagesearch.model.ResponseModel;
-import jp.s5r.android.imagesearch.model.ResultModel;
+import jp.s5r.android.imagesearch.api.googleimage.GoogleImageSearchApi;
+import jp.s5r.android.imagesearch.api.googleimage.model.CursorModel;
+import jp.s5r.android.imagesearch.api.googleimage.model.ResponseDataModel;
+import jp.s5r.android.imagesearch.api.googleimage.model.ResponseModel;
+import jp.s5r.android.imagesearch.api.model.ImageModel;
+import jp.s5r.android.imagesearch.api.tiqav.TiqavApi;
+import jp.s5r.android.imagesearch.api.tiqav.model.TiqavImageModel;
 import jp.s5r.android.imagesearch.util.ImageUtil;
 import jp.s5r.android.imagesearch.util.IntentUtil;
 
@@ -32,15 +34,19 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class ImageGridFragment
   extends BaseFragment
   implements SearchView.OnQueryTextListener,
-             ImageSearchApi.OnResponseListener,
+             GoogleImageSearchApi.OnGoogleImageResponseListener,
              ImageGridAdapter.OnItemClickListener,
-             AbsListView.OnScrollListener {
+             AbsListView.OnScrollListener,
+             TiqavApi.OnTiqavResponseListener {
 
-  private ImageSearchApi mImageSearchApi;
+  private GoogleImageSearchApi mGoogleImageSearchApi;
+  private TiqavApi mTiqavApi;
+
   private ImageGridAdapter mAdapter;
   private boolean mIsIntentMode;
   private File mCacheDir;
@@ -49,6 +55,7 @@ public class ImageGridFragment
   private boolean mHasNext;
   private String mCurrentQuery;
   private int mNextStart;
+  private boolean mIsLoadTiqav;
 
   private ProgressDialogFragment mProgressDialog;
 
@@ -76,8 +83,12 @@ public class ImageGridFragment
     mAdapter.setOnItemClickListener(this);
     mGridView.setAdapter(mAdapter);
     mGridView.setOnScrollListener(this);
-    mImageSearchApi = new ImageSearchApi();
-    mImageSearchApi.setOnResponseListener(this);
+    mGoogleImageSearchApi = new GoogleImageSearchApi();
+    mGoogleImageSearchApi.setOnGoogleImageResponseListener(this);
+
+    mTiqavApi = new TiqavApi();
+    mTiqavApi.setOnTiqavResponseListener(this);
+
 
     initCacheDir();
   }
@@ -96,9 +107,13 @@ public class ImageGridFragment
     if (mGridView != null) {
       mGridView.setAdapter(null);
     }
-    if (mImageSearchApi != null) {
-      mImageSearchApi.setOnResponseListener(null);
-      mImageSearchApi = null;
+    if (mGoogleImageSearchApi != null) {
+      mGoogleImageSearchApi.setOnGoogleImageResponseListener(null);
+      mGoogleImageSearchApi = null;
+    }
+    if (mTiqavApi != null) {
+      mTiqavApi.setOnTiqavResponseListener(null);
+      mTiqavApi = null;
     }
 
     super.onDestroy();
@@ -115,6 +130,7 @@ public class ImageGridFragment
     mAdapter.clear();
     mCurrentQuery = query;
     mNextStart = 0;
+    mIsLoadTiqav = false;
 
     mProgressDialog = new ProgressDialogFragment();
     mProgressDialog.show(getFragmentManager(), "dialog");
@@ -125,11 +141,15 @@ public class ImageGridFragment
 
   private synchronized void loadItems() {
     mIsLoading = true;
-    mImageSearchApi.search(mCurrentQuery, mNextStart);
+    if (mIsLoadTiqav) {
+      mGoogleImageSearchApi.search(mCurrentQuery, mNextStart);
+    } else {
+      mTiqavApi.search(mCurrentQuery);
+    }
   }
 
   @Override
-  public void onResponse(ResponseModel response) {
+  public void onGoogleImageResponse(ResponseModel response) {
     mIsLoading = false;
     if (mProgressDialog != null) {
       mProgressDialog.dismiss();
@@ -148,7 +168,7 @@ public class ImageGridFragment
       }
 
       if (mAdapter != null) {
-        mAdapter.addAll(responseData.getResults());
+        mAdapter.addGoogleImages(responseData.getResults());
         mAdapter.notifyDataSetChanged();
       }
     } else {
@@ -157,14 +177,8 @@ public class ImageGridFragment
   }
 
   @Override
-  public void onFailure() {
-    mIsLoading = false;
-    if (mProgressDialog != null) {
-      mProgressDialog.dismiss();
-      mProgressDialog = null;
-      hideSoftKeyboard();
-    }
-    mHasNext = false;
+  public void onGoogleImageFailure() {
+    onRequestFailure();
   }
 
   @Override
@@ -173,8 +187,8 @@ public class ImageGridFragment
   }
 
   @Override
-  public void onItemClick(ResultModel result) {
-    asyncDownloadImage(result.getUnescapedUrl());
+  public void onItemClick(ImageModel result) {
+    asyncDownloadImage(result.getOriginalUrl());
   }
 
   private void asyncDownloadImage(String uri) {
@@ -250,5 +264,38 @@ public class ImageGridFragment
         mGridView.requestFocus();
       }
     });
+  }
+
+  @Override
+  public void onTiqavResponse(List<TiqavImageModel> response) {
+    mIsLoading = false;
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+      hideSoftKeyboard();
+    }
+
+    mIsLoadTiqav = true;
+    mHasNext = true;
+    if (mAdapter != null) {
+      mAdapter.addTiqavImages(response);
+      mAdapter.notifyDataSetChanged();
+    }
+  }
+
+  @Override
+  public void onTiqavFailure() {
+    mIsLoadTiqav = true;
+    loadItems();
+  }
+
+  private void onRequestFailure() {
+    mIsLoading = false;
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+      hideSoftKeyboard();
+    }
+    mHasNext = false;
   }
 }
