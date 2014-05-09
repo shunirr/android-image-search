@@ -11,9 +11,9 @@ import jp.s5r.android.imagesearch.model.ResponseDataModel;
 import jp.s5r.android.imagesearch.model.ResponseModel;
 import jp.s5r.android.imagesearch.model.ResultModel;
 import jp.s5r.android.imagesearch.util.ImageUtil;
+import jp.s5r.android.imagesearch.util.IntentUtil;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -215,30 +215,16 @@ public class ImageGridFragment
     try {
       ImageUtil.saveImage(path, bitmap);
       if (mIsIntentMode) {
-        Uri uri = ImageUtil.addGarally(getActivity(), path);
         Intent intent = new Intent();
-        intent.setData(uri);
+        intent.setData(Uri.fromFile(path));
         getActivity().setResult(Activity.RESULT_OK, intent);
       } else {
-        shareImage(path);
+        IntentUtil.shareImage(getActivity(), path);
       }
     } catch (IOException ignored) {}
 
     if (mIsIntentMode) {
       getActivity().finish();
-    }
-  }
-
-  private void shareImage(File file) {
-    Intent intent = new Intent(Intent.ACTION_SEND);
-    intent.setType("image/jpeg");
-    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-    intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-    intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-    try {
-      startActivity(intent);
-    } catch (ActivityNotFoundException e) {
-      Toast.makeText(getActivity(), "Failed to launch app.", Toast.LENGTH_SHORT).show();
     }
   }
 
