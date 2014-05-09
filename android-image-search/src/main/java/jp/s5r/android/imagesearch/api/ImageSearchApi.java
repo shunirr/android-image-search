@@ -28,6 +28,8 @@ public class ImageSearchApi {
 
   public interface OnResponseListener {
     void onResponse(ResponseModel response);
+
+    void onFailure();
   }
 
   public ImageSearchApi() {
@@ -61,6 +63,14 @@ public class ImageSearchApi {
           mOnResponseListener.onResponse(response);
         }
       }
+
+      @Override
+      public void onFailure(Throwable error) {
+        super.onFailure(error);
+        if (mOnResponseListener != null) {
+          mOnResponseListener.onFailure();
+        }
+      }
     });
   }
 
@@ -72,7 +82,7 @@ public class ImageSearchApi {
 
     builder.appendQueryParameter(PARAM_VERSION, API_VERSION);
     builder.appendQueryParameter(PARAM_COUNT, DEFAULT_COUNT);
-    builder.appendQueryParameter(PARAM_QUERY, query);
+    builder.appendQueryParameter(PARAM_QUERY, query.replaceAll("[ 　]+", "+"));
     if (start > 0) {
       builder.appendQueryParameter(PARAM_START, String.valueOf(start));
     }

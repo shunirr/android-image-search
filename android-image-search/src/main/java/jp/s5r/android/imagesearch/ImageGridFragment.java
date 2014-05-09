@@ -3,6 +3,7 @@ package jp.s5r.android.imagesearch;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
 import jp.s5r.android.imagesearch.api.ImageSearchApi;
 import jp.s5r.android.imagesearch.model.CursorModel;
@@ -26,6 +27,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.GridView;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -154,6 +156,17 @@ public class ImageGridFragment
   }
 
   @Override
+  public void onFailure() {
+    mIsLoading = false;
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+      hideSoftKeyboard();
+    }
+    mHasNext = false;
+  }
+
+  @Override
   public boolean onQueryTextChange(String newText) {
     return false;
   }
@@ -161,7 +174,7 @@ public class ImageGridFragment
   @Override
   public void onItemClick(ResultModel result) {
     if (mIsIntentMode) {
-      asyncDownloadImage(result.getUrl());
+      asyncDownloadImage(result.getUnescapedUrl());
     }
   }
 
@@ -176,7 +189,21 @@ public class ImageGridFragment
         public void onLoadingComplete(String s, View view, Bitmap bitmap) {
           onDownloadComplete(bitmap);
         }
+
+        @Override
+        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+          onDownloadFailed(failReason.getCause().getMessage());
+        }
       });
+  }
+
+  private void onDownloadFailed(String message) {
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+    }
+
+    Toast.makeText(getActivity(), "Failed to download image.", Toast.LENGTH_LONG).show();
   }
 
   private void onDownloadComplete(Bitmap bitmap) {
