@@ -1,4 +1,4 @@
-package jp.s5r.android.imagesearch;
+package jp.s5r.android.imagesearch.dialog;
 
 import android.app.Dialog;
 import android.app.DialogFragment;

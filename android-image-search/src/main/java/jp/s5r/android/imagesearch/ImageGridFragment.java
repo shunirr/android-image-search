@@ -11,6 +11,8 @@ import jp.s5r.android.imagesearch.api.googleimage.model.ResponseDataModel;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseModel;
 import jp.s5r.android.imagesearch.api.tiqav.TiqavApi;
 import jp.s5r.android.imagesearch.api.tiqav.model.TiqavImageModel;
+import jp.s5r.android.imagesearch.dialog.ImagePreviewDialogFragment;
+import jp.s5r.android.imagesearch.dialog.ProgressDialogFragment;
 import jp.s5r.android.imagesearch.model.ImageModel;
 import jp.s5r.android.imagesearch.util.Config;
 import jp.s5r.android.imagesearch.util.ImageUtil;
@@ -202,7 +204,18 @@ public class ImageGridFragment
 
   @Override
   public void onItemClick(ImageModel result) {
-    asyncDownloadImage(result.getOriginalUrl());
+    ImagePreviewDialogFragment dialog = new ImagePreviewDialogFragment(result);
+    dialog.setOnDialogButtonListener(new ImagePreviewDialogFragment.OnDialogButtonListener() {
+      @Override
+      public void onClickShare(ImageModel model) {
+        asyncDownloadImage(model.getOriginalUrl());
+      }
+
+      @Override
+      public void onClickCancel(ImageModel model) {
+      }
+    });
+    dialog.show(getFragmentManager(), "dialog");
   }
 
   private void asyncDownloadImage(String uri) {
