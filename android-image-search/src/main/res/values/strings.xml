@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ImageSearch</string>
+
+    <string name="config_general">GENERAL</string>
+    <string name="config_use_tiqav">Use Tiqav</string>
+    <string name="config_save_gallery">Save Gallery</string>
 </resources>
