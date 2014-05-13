@@ -74,6 +74,9 @@ public class ImagePreviewDialogFragment extends DialogFragment implements ImageL
 
   @Override
   public void onLoadingComplete(String imageUrl, View view, Bitmap bitmap) {
+    if (!isAdded()) {
+      return;
+    }
     mImageView.setImageBitmap(bitmap);
     if (!imageUrl.equals(mImageModel.getOriginalUrl())) {
       ImageLoader.getInstance().loadImage(mImageModel.getOriginalUrl(), this);

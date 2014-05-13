@@ -4,7 +4,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
 import jp.s5r.android.imagesearch.api.googleimage.GoogleImageSearchApi;
 import jp.s5r.android.imagesearch.api.googleimage.model.CursorModel;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseDataModel;
@@ -219,20 +219,33 @@ public class ImageGridFragment
   }
 
   private void asyncDownloadImage(String uri) {
+    if (mProgressDialog != null) {
+      mProgressDialog.dismiss();
+      mProgressDialog = null;
+    }
     mProgressDialog = new ProgressDialogFragment();
     mProgressDialog.show(getFragmentManager(), "dialog");
 
     ImageLoader.getInstance().loadImage(
       uri,
-      new SimpleImageLoadingListener() {
+      new ImageLoadingListener() {
+        @Override
+        public void onLoadingStarted(String s, View view) {
+        }
+
+        @Override
+        public void onLoadingFailed(String s, View view, FailReason failReason) {
+          onDownloadFailed(failReason.getCause().getMessage());
+        }
+
         @Override
         public void onLoadingComplete(String s, View view, Bitmap bitmap) {
           onDownloadComplete(bitmap);
         }
 
         @Override
-        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-          onDownloadFailed(failReason.getCause().getMessage());
+        public void onLoadingCancelled(String s, View view) {
+          asyncDownloadImage(s);
         }
       });
   }
