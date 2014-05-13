@@ -1,8 +1,10 @@
 package jp.s5r.android.imagesearch;
 
+import com.nostra13.universalimageloader.cache.disc.impl.TotalSizeLimitedDiscCache;
 import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.utils.StorageUtils;
 
 import android.app.Application;
 
@@ -14,6 +16,7 @@ public class MyApplication extends Application {
     ImageLoaderConfiguration config =
       new ImageLoaderConfiguration.Builder(getApplicationContext())
         .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
+        .discCache(new TotalSizeLimitedDiscCache(StorageUtils.getCacheDirectory(this), 20 * 1024 * 1024))
         .build();
     ImageLoader.getInstance().init(config);
   }
