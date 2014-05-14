@@ -5,4 +5,5 @@
     <string name="config_general">GENERAL</string>
     <string name="config_use_tiqav">tiqavを使う</string>
     <string name="config_save_gallery">ギャラリーに保存する</string>
+    <string name="searchview_hint">検索</string>
 </resources>

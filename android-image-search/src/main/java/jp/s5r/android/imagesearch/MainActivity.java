@@ -67,7 +67,7 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
       mSearchView = (SearchView) searchItem.getActionView();
     }
     if (mSearchView != null) {
-      mSearchView.setQueryHint("");
+      mSearchView.setQueryHint(getString(R.string.searchview_hint));
       mSearchView.setOnQueryTextListener(this);
       mSearchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
         @Override
