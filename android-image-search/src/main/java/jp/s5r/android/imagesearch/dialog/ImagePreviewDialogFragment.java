@@ -3,16 +3,18 @@ package jp.s5r.android.imagesearch.dialog;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
+import jp.s5r.android.imagesearch.R;
 import jp.s5r.android.imagesearch.model.ImageModel;
+import jp.s5r.android.imagesearch.util.DisplayUtil;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 
 public class ImagePreviewDialogFragment extends DialogFragment implements ImageLoadingListener {
@@ -22,7 +24,8 @@ public class ImagePreviewDialogFragment extends DialogFragment implements ImageL
     void onClickCancel(ImageModel model);
   }
 
-  private ImageModel mImageModel;
+  private final ImageModel mImageModel;
+
   private ImageView mImageView;
   private OnDialogButtonListener mOnDialogButtonListener;
 
@@ -35,32 +38,48 @@ public class ImagePreviewDialogFragment extends DialogFragment implements ImageL
   }
 
   @Override
+  public void onActivityCreated(Bundle savedInstanceState) {
+    super.onActivityCreated(savedInstanceState);
+    Dialog dialog = getDialog();
+    WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
+    int displayWidth = DisplayUtil.getDisplayWidth(getActivity().getWindowManager());
+    int buttonHeight = DisplayUtil.convertDpToPixel(getActivity(), 52);
+    lp.width = (int) (displayWidth * 0.9);
+    lp.height = (int) (displayWidth * 0.9 * mImageModel.getAspectRatio()) + buttonHeight;
+    dialog.getWindow().setAttributes(lp);
+  }
+
+  @Override
   public Dialog onCreateDialog(Bundle savedInstanceState) {
-    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-    mImageView = new ImageView(getActivity());
-    mImageView.setScaleType(ImageView.ScaleType.FIT_XY);
+    Dialog dialog = new Dialog(getActivity());
+    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+    dialog.setContentView(R.layout.preview_dialog);
+    mImageView = (ImageView) dialog.findViewById(R.id.preview_dialog_image);
+    mImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
     mImageView.setAdjustViewBounds(true);
     ImageLoader.getInstance().loadImage(mImageModel.getThumbnailUrl(), this);
-    builder.setView(mImageView);
-    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+    Button leftButton = (Button) dialog.findViewById(R.id.preview_dialog_left_button);
+    leftButton.setText("Cancel");
+    leftButton.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void onClick(DialogInterface dialog, int which) {
+      public void onClick(View v) {
+        dismiss();
         if (mOnDialogButtonListener != null) {
           mOnDialogButtonListener.onClickCancel(mImageModel);
         }
       }
     });
-    builder.setPositiveButton("Share", new DialogInterface.OnClickListener() {
+    Button rightButton = (Button) dialog.findViewById(R.id.preview_dialog_right_button);
+    rightButton.setText("Share");
+    rightButton.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void onClick(DialogInterface dialog, int which) {
+      public void onClick(View v) {
+        dismiss();
         if (mOnDialogButtonListener != null) {
           mOnDialogButtonListener.onClickShare(mImageModel);
         }
       }
     });
-
-    Dialog dialog = builder.create();
-    dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
     return dialog;
   }
 
