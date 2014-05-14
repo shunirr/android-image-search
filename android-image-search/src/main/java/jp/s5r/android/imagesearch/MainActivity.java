@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.SearchView;
 
 import java.io.File;
@@ -14,6 +15,8 @@ import java.io.File;
 public class MainActivity extends BaseActivity implements SearchView.OnQueryTextListener {
 
   private ImageGridFragment mFragment;
+  private SearchView mSearchView;
+  private boolean mIsSearchViewExpanded;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -60,12 +63,20 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
     getMenuInflater().inflate(R.menu.main, menu);
 
     MenuItem searchItem = menu.findItem(R.id.menu_search);
-    SearchView searchView = null;
     if (searchItem != null) {
-      searchView = (SearchView) searchItem.getActionView();
+      mSearchView = (SearchView) searchItem.getActionView();
     }
-    if (searchView != null) {
-      searchView.setOnQueryTextListener(this);
+    if (mSearchView != null) {
+      mSearchView.setQueryHint("");
+      mSearchView.setOnQueryTextListener(this);
+      mSearchView.setOnQueryTextFocusChangeListener(new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+          if (hasFocus) {
+            mIsSearchViewExpanded = true;
+          }
+        }
+      });
     }
 
     return true;
@@ -96,5 +107,15 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
       }
     }
     return false;
+  }
+
+  @Override
+  public void onBackPressed() {
+    if (mSearchView != null && mIsSearchViewExpanded) {
+      mSearchView.onActionViewCollapsed();
+      mIsSearchViewExpanded = false;
+    } else {
+      super.onBackPressed();
+    }
   }
 }
