@@ -1,5 +1,7 @@
 package jp.s5r.android.imagesearch;
 
+import jp.s5r.android.imagesearch.util.FileUtil;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,8 +11,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
-
-import java.io.File;
 
 public class MainActivity extends BaseActivity implements SearchView.OnQueryTextListener {
 
@@ -35,11 +35,7 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
         mFragment.setIntentPickerMode(true);
       } else if (MediaStore.ACTION_IMAGE_CAPTURE.equals(a)) {
         Uri saveFileUri = intent.getParcelableExtra(MediaStore.EXTRA_OUTPUT);
-        File saveFile = null;
-        if (saveFileUri != null) {
-          saveFile = new File(saveFileUri.getPath());
-        }
-        mFragment.setIntentCaptureMode(true, saveFile);
+        mFragment.setIntentCaptureMode(true, FileUtil.getRealFile(this, saveFileUri));
       }
     }
   }
