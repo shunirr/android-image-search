@@ -3,6 +3,7 @@ package jp.s5r.android.imagesearch;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import jp.s5r.android.imagesearch.api.googlesuggest.GoogleSuggestApi;
+import jp.s5r.android.imagesearch.util.Config;
 import jp.s5r.android.imagesearch.util.FileUtil;
 
 import android.content.Intent;
@@ -116,7 +117,9 @@ public class MainActivity
   @Override
   public boolean onQueryTextChange(String newText) {
     if (!newText.equals(mSuggestionQuery)) {
-      mGoogleSuggestApi.suggest(newText);
+      if (Config.useSuggestion(this)) {
+        mGoogleSuggestApi.suggest(newText);
+      }
     }
     if (mFragment != null) {
       return mFragment.onQueryTextChange(newText);

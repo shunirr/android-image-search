@@ -16,4 +16,9 @@ public final class Config {
     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
     return prefs.getBoolean("prefs_save_gallery", false);
   }
+
+  public static boolean useSuggestion(Context context) {
+    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+    return prefs.getBoolean("prefs_use_suggestion", false);
+  }
 }

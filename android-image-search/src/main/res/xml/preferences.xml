@@ -10,5 +10,9 @@
             android:key="prefs_save_gallery"
             android:title="@string/config_save_gallery"
             />
+        <CheckBoxPreference
+            android:key="prefs_use_suggestion"
+            android:title="@string/config_use_suggestion"
+            />
     </PreferenceCategory>
 </PreferenceScreen>
