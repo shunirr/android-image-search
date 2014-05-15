@@ -9,6 +9,7 @@ import jp.s5r.android.imagesearch.api.googleimage.GoogleImageSearchApi;
 import jp.s5r.android.imagesearch.api.googleimage.model.CursorModel;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseDataModel;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseModel;
+import jp.s5r.android.imagesearch.api.googlesuggest.GoogleSuggestApi;
 import jp.s5r.android.imagesearch.api.tiqav.TiqavApi;
 import jp.s5r.android.imagesearch.api.tiqav.model.TiqavImageModel;
 import jp.s5r.android.imagesearch.dialog.ImagePreviewDialogFragment;
@@ -27,6 +28,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,10 +48,12 @@ public class ImageGridFragment
              GoogleImageSearchApi.OnGoogleImageResponseListener,
              ImageGridAdapter.OnItemClickListener,
              AbsListView.OnScrollListener,
-             TiqavApi.OnTiqavResponseListener {
+             TiqavApi.OnTiqavResponseListener,
+             GoogleSuggestApi.OnGoogleSuggestResponseListener {
 
   private GoogleImageSearchApi mGoogleImageSearchApi;
   private TiqavApi mTiqavApi;
+  private GoogleSuggestApi mGoogleSuggestApi;
 
   private ImageGridAdapter mAdapter;
   private boolean mIsIntentPickerMode;
@@ -103,6 +107,8 @@ public class ImageGridFragment
     mGridView.setOnScrollListener(this);
     mGoogleImageSearchApi = new GoogleImageSearchApi();
     mGoogleImageSearchApi.setOnGoogleImageResponseListener(this);
+    mGoogleSuggestApi = new GoogleSuggestApi();
+    mGoogleSuggestApi.setOnGoogleSuggestResponseListener(this);
 
     mTiqavApi = new TiqavApi();
     mTiqavApi.setOnTiqavResponseListener(this);
@@ -123,6 +129,10 @@ public class ImageGridFragment
     if (mTiqavApi != null) {
       mTiqavApi.setOnTiqavResponseListener(null);
       mTiqavApi = null;
+    }
+    if (mGoogleSuggestApi != null) {
+      mGoogleSuggestApi.setOnGoogleSuggestResponseListener(null);
+      mGoogleSuggestApi = null;
     }
 
     super.onStop();
@@ -199,6 +209,7 @@ public class ImageGridFragment
 
   @Override
   public boolean onQueryTextChange(String newText) {
+    mGoogleSuggestApi.suggest(newText);
     return false;
   }
 
@@ -353,5 +364,18 @@ public class ImageGridFragment
       hideSoftKeyboard();
     }
     mHasNext = false;
+  }
+
+  @Override
+  public void onGoogleSuggestResponse(List<String> response) {
+    if (response != null && response.size() > 0) {
+      for (String suggest : response) {
+        Log.d("ImageSearch", "suggestion: " + suggest);
+      }
+    }
+  }
+
+  @Override
+  public void onGoogleSuggestFailure() {
   }
 }
