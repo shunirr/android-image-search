@@ -273,7 +273,7 @@ public class ImageGridFragment
       ImageUtil.saveImage(path, bitmap);
       Uri uri = Uri.fromFile(path);
       if (Config.saveGallery(getActivity())) {
-        uri = ImageUtil.addGarally(getActivity(), path);
+        uri = ImageUtil.addGarally(getActivity(), path, mCurrentQuery);
       }
 
       if (mIsIntentPickerMode) {
