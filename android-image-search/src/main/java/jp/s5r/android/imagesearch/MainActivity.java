@@ -1,5 +1,8 @@
 package jp.s5r.android.imagesearch;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import jp.s5r.android.imagesearch.api.googlesuggest.GoogleSuggestApi;
 import jp.s5r.android.imagesearch.util.FileUtil;
 
 import android.content.Intent;
@@ -7,21 +10,39 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 
-public class MainActivity extends BaseActivity implements SearchView.OnQueryTextListener {
+import java.util.List;
+
+public class MainActivity
+  extends BaseActivity
+  implements SearchView.OnQueryTextListener,
+             GoogleSuggestApi.OnGoogleSuggestResponseListener,
+             AdapterView.OnItemClickListener {
 
   private ImageGridFragment mFragment;
   private SearchView mSearchView;
   private boolean mIsSearchViewExpanded;
 
+  @InjectView(R.id.suggestion)
+  ListView mSuggestionList;
+  private GoogleSuggestApi mGoogleSuggestApi;
+  private String mSuggestionQuery;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+
+    ButterKnife.inject(this);
 
     if (savedInstanceState == null) {
       mFragment = new ImageGridFragment();
@@ -38,6 +59,20 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
         mFragment.setIntentCaptureMode(true, FileUtil.getRealFile(this, saveFileUri));
       }
     }
+
+    mGoogleSuggestApi = new GoogleSuggestApi();
+    mGoogleSuggestApi.setOnGoogleSuggestResponseListener(this);
+  }
+
+  @Override
+  protected void onDestroy() {
+    if (mGoogleSuggestApi != null) {
+      mGoogleSuggestApi.setOnGoogleSuggestResponseListener(null);
+      mGoogleSuggestApi = null;
+    }
+
+    ButterKnife.reset(this);
+    super.onDestroy();
   }
 
   @Override
@@ -80,6 +115,9 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
 
   @Override
   public boolean onQueryTextChange(String newText) {
+    if (!newText.equals(mSuggestionQuery)) {
+      mGoogleSuggestApi.suggest(newText);
+    }
     if (mFragment != null) {
       return mFragment.onQueryTextChange(newText);
     }
@@ -88,6 +126,7 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
 
   @Override
   public boolean onQueryTextSubmit(final String query) {
+    mSuggestionList.setVisibility(View.GONE);
     if (popToTop()) {
       new Handler(getMainLooper()).postDelayed(new Runnable() {
         @Override
@@ -107,11 +146,39 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
 
   @Override
   public void onBackPressed() {
+    mSuggestionList.setVisibility(View.GONE);
     if (mSearchView != null && mIsSearchViewExpanded) {
       mSearchView.onActionViewCollapsed();
       mIsSearchViewExpanded = false;
     } else {
       super.onBackPressed();
+    }
+  }
+
+  @Override
+  public void onGoogleSuggestResponse(List<String> response) {
+    if (response != null && response.size() > 0) {
+      ArrayAdapter<String> suggestionAdapter =
+        new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, response);
+      mSuggestionList.setAdapter(suggestionAdapter);
+      mSuggestionList.setOnItemClickListener(this);
+      mSuggestionList.setVisibility(View.VISIBLE);
+    }
+  }
+
+  @Override
+  public void onGoogleSuggestFailure() {
+  }
+
+  @Override
+  public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    TextView text = (TextView) view.findViewById(android.R.id.text1);
+    if (text != null) {
+      String query = (String) text.getText();
+      if (!TextUtils.isEmpty(query)) {
+        mSuggestionQuery = query;
+        mSearchView.setQuery(query, true);
+      }
     }
   }
 }
