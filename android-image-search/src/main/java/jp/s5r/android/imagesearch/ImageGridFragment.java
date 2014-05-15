@@ -19,14 +19,18 @@ import jp.s5r.android.imagesearch.util.ImageUtil;
 import jp.s5r.android.imagesearch.util.IntentUtil;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.BaseColumns;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +51,8 @@ public class ImageGridFragment
              ImageGridAdapter.OnItemClickListener,
              AbsListView.OnScrollListener,
              TiqavApi.OnTiqavResponseListener {
+
+  private static final String CACHE_DIR = Environment.getExternalStorageDirectory() + "/Pictures/ImageSearch/";
 
   private GoogleImageSearchApi mGoogleImageSearchApi;
   private TiqavApi mTiqavApi;
@@ -82,7 +88,7 @@ public class ImageGridFragment
   }
 
   private void initCacheDir() {
-    File cacheDir = new File(Environment.getExternalStorageDirectory(), "Pictures/ImageSearch/");
+    File cacheDir = new File(CACHE_DIR);
     if (!cacheDir.exists()) {
       cacheDir.mkdirs();
     }
@@ -108,6 +114,36 @@ public class ImageGridFragment
     mTiqavApi.setOnTiqavResponseListener(this);
 
     initCacheDir();
+
+    loadInitialImages();
+  }
+
+  private void loadInitialImages() {
+    ContentResolver cr = getActivity().getContentResolver();
+    Cursor c = null;
+    try {
+      c = cr.query(
+        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        new String[] {BaseColumns._ID, MediaStore.Images.Media.DATA},
+        MediaStore.Images.Media.DATA + " like '%" + CACHE_DIR + "%'",
+        null,
+        "_id DESC");
+
+      if (c != null && c.moveToFirst()) {
+        int idIndex = c.getColumnIndex(BaseColumns._ID);
+        do {
+          String uri =
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI + "/" + c.getString(idIndex);
+          mGridAdapter.addImage(new ImageModel(uri));
+        } while (c.moveToNext());
+
+        mGridAdapter.notifyDataSetInvalidated();
+      }
+    } finally {
+      if (c != null && !c.isClosed()) {
+        c.close();
+      }
+    }
   }
 
   @Override

@@ -53,6 +53,13 @@ public class ImageGridAdapter extends BaseAdapter {
     }
   }
 
+  public void addImage(ImageModel imageModel) {
+    if (mImageList == null) {
+      mImageList = new ArrayList<ImageModel>();
+    }
+    mImageList.add(imageModel);
+  }
+
   public void addTiqavImages(List<TiqavImageModel> results) {
     if (mImageList == null) {
       mImageList = new ArrayList<ImageModel>();

@@ -8,6 +8,12 @@ public class ImageModel {
   private final String mOriginalUrl;
   private final float mAspectRatio;
 
+  public ImageModel(String url) {
+    mThumbnailUrl = url;
+    mOriginalUrl = url;
+    mAspectRatio = -1;
+  }
+
   public ImageModel(TiqavImageModel tiqavImage) {
     mThumbnailUrl = tiqavImage.getThumbnailUrl();
     mOriginalUrl = tiqavImage.getThumbnailUrl();

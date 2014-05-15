@@ -40,23 +40,25 @@ public class ImagePreviewDialogFragment extends DialogFragment implements ImageL
   @Override
   public void onActivityCreated(Bundle savedInstanceState) {
     super.onActivityCreated(savedInstanceState);
-    Dialog dialog = getDialog();
-    WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
-    int displayWidth  = DisplayUtil.getDisplayWidth(getActivity().getWindowManager());
-    int displayHeight = DisplayUtil.getDisplayHeight(getActivity().getWindowManager());
-    int buttonHeight = DisplayUtil.convertDpToPixel(getActivity(), 52);
 
-    float scale = 0.9f;
-    while (true) {
-      lp.width = (int) (displayWidth * scale);
-      lp.height = (int) (displayWidth * scale * mImageModel.getAspectRatio()) + buttonHeight;
-      if (lp.height < (displayHeight * 0.9)) {
-        break;
+    if (mImageModel.getAspectRatio() > 0) {
+      Dialog dialog = getDialog();
+      WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
+      int displayWidth  = DisplayUtil.getDisplayWidth(getActivity().getWindowManager());
+      int displayHeight = DisplayUtil.getDisplayHeight(getActivity().getWindowManager());
+      int buttonHeight = DisplayUtil.convertDpToPixel(getActivity(), 52);
+
+      float scale = 0.9f;
+      while (true) {
+        lp.width = (int) (displayWidth * scale);
+        lp.height = (int) (displayWidth * scale * mImageModel.getAspectRatio()) + buttonHeight;
+        if (lp.height < (displayHeight * 0.9)) {
+          break;
+        }
+        scale -= 0.05f;
       }
-      scale -= 0.05f;
+      dialog.getWindow().setAttributes(lp);
     }
-
-    dialog.getWindow().setAttributes(lp);
   }
 
   @Override
