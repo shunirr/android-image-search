@@ -1,5 +1,6 @@
 package jp.s5r.android.imagesearch;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.nostra13.universalimageloader.cache.disc.impl.TotalSizeLimitedDiscCache;
 import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -12,6 +13,8 @@ public class MyApplication extends Application {
   @Override
   public void onCreate() {
     super.onCreate();
+
+    BugSenseHandler.initAndStartSession(this, "0fc599a9");
 
     ImageLoaderConfiguration config =
       new ImageLoaderConfiguration.Builder(getApplicationContext())
