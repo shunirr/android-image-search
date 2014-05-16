@@ -129,7 +129,7 @@ public class MainActivity
 
   @Override
   public boolean onQueryTextSubmit(final String query) {
-    mSuggestionList.setVisibility(View.GONE);
+    hideSuggestionList();
     if (popToTop()) {
       new Handler(getMainLooper()).postDelayed(new Runnable() {
         @Override
@@ -149,7 +149,7 @@ public class MainActivity
 
   @Override
   public void onBackPressed() {
-    mSuggestionList.setVisibility(View.GONE);
+    hideSuggestionList();
     if (mSearchView != null && mIsSearchViewExpanded) {
       mSearchView.onActionViewCollapsed();
       mSearchView.setQuery("", false);
@@ -184,5 +184,9 @@ public class MainActivity
         mSearchView.setQuery(query, true);
       }
     }
+  }
+
+  public void hideSuggestionList() {
+    mSuggestionList.setVisibility(View.GONE);
   }
 }

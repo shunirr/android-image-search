@@ -119,6 +119,14 @@ public class ImageGridFragment
     loadInitialImages();
   }
 
+  public MainActivity getMainActivity() {
+    Activity a = super.getActivity();
+    if (a != null && a instanceof MainActivity) {
+      return (MainActivity) a;
+    }
+    return null;
+  }
+
   private void loadInitialImages() {
     ContentResolver cr = getActivity().getContentResolver();
     Cursor c = null;
@@ -210,6 +218,8 @@ public class ImageGridFragment
       hideSoftKeyboard();
     }
 
+    getMainActivity().hideSuggestionList();
+
     ResponseDataModel responseData = response.getResponseData();
     if (responseData != null) {
       CursorModel cursor = responseData.getCursor();
@@ -241,6 +251,8 @@ public class ImageGridFragment
 
   @Override
   public void onItemClick(ImageModel result) {
+    getMainActivity().hideSuggestionList();
+
     ImagePreviewDialogFragment dialog = new ImagePreviewDialogFragment(result);
     dialog.setOnDialogButtonListener(new ImagePreviewDialogFragment.OnDialogButtonListener() {
       @Override
@@ -367,6 +379,8 @@ public class ImageGridFragment
       mProgressDialog = null;
       hideSoftKeyboard();
     }
+
+    getMainActivity().hideSuggestionList();
 
     mIsLoadTiqav = true;
     mHasNext = true;
