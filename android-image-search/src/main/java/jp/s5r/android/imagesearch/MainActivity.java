@@ -116,7 +116,7 @@ public class MainActivity
 
   @Override
   public boolean onQueryTextChange(String newText) {
-    if (!newText.equals(mSuggestionQuery)) {
+    if (!newText.equals(mSuggestionQuery) && !TextUtils.isEmpty(newText)) {
       if (Config.useSuggestion(this)) {
         mGoogleSuggestApi.suggest(newText);
       }
@@ -152,6 +152,7 @@ public class MainActivity
     mSuggestionList.setVisibility(View.GONE);
     if (mSearchView != null && mIsSearchViewExpanded) {
       mSearchView.onActionViewCollapsed();
+      mSearchView.setQuery("", false);
       mIsSearchViewExpanded = false;
     } else {
       super.onBackPressed();
