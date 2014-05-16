@@ -5,4 +5,6 @@
     <string name="config_general">GENERAL</string>
     <string name="config_use_tiqav">Use Tiqav</string>
     <string name="config_save_gallery">Save Gallery</string>
+    <string name="searchview_hint">Search</string>
+    <string name="config_use_suggestion">Use Suggestion</string>
 </resources>

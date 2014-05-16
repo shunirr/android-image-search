@@ -9,16 +9,16 @@ import android.util.Log;
 
 public class GoogleImageSearchApi extends BaseApi {
 
-  private static String API_VERSION = "1.0";
-  private static String DEFAULT_COUNT = "8";
+  private static final String API_VERSION = "1.0";
+  private static final String DEFAULT_COUNT = "8";
 
-  private static String SCHEME = "https";
-  private static String HOST = "ajax.googleapis.com";
-  private static String PATH = "/ajax/services/search/images";
-  private static String PARAM_VERSION = "v";
-  private static String PARAM_COUNT = "rsz";
-  private static String PARAM_QUERY = "q";
-  private static String PARAM_START = "start";
+  private static final String SCHEME = "https";
+  private static final String HOST = "ajax.googleapis.com";
+  private static final String PATH = "/ajax/services/search/images";
+  private static final String PARAM_VERSION = "v";
+  private static final String PARAM_COUNT = "rsz";
+  private static final String PARAM_QUERY = "q";
+  private static final String PARAM_START = "start";
 
   private OnGoogleImageResponseListener mOnGoogleImageResponseListener;
 

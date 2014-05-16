@@ -27,13 +27,14 @@ public final class ImageUtil {
     }
   }
 
-  public static Uri addGarally(Context context, File path) throws IOException {
+  public static Uri addGarally(Context context, File path, String title) throws IOException {
     ContentValues values = new ContentValues();
     ContentResolver contentResolver = context.getContentResolver();
     values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
     values.put(MediaStore.Images.Media.DATE_MODIFIED, System.currentTimeMillis() / 1000);
     values.put(MediaStore.Images.Media.SIZE, path.length());
-    values.put(MediaStore.Images.Media.TITLE, path.getName());
+    values.put(MediaStore.Images.Media.TITLE, title);
+    values.put(MediaStore.Images.Media.DESCRIPTION, title);
     values.put(MediaStore.Images.Media.DATA, path.getPath());
     return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
   }
