@@ -178,10 +178,13 @@ public class MainActivity
   public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
     TextView text = (TextView) view.findViewById(android.R.id.text1);
     if (text != null) {
-      String query = (String) text.getText();
-      if (!TextUtils.isEmpty(query)) {
-        mSuggestionQuery = query;
-        mSearchView.setQuery(query, true);
+      CharSequence charSequence = text.getText();
+      if (charSequence != null) {
+        String query = charSequence.toString();
+        if (!TextUtils.isEmpty(query)) {
+          mSuggestionQuery = query;
+          mSearchView.setQuery(query, true);
+        }
       }
     }
   }
