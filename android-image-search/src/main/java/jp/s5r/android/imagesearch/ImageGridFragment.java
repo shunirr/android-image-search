@@ -53,6 +53,7 @@ public class ImageGridFragment
              TiqavApi.OnTiqavResponseListener {
 
   private static final String CACHE_DIR = Environment.getExternalStorageDirectory() + "/Pictures/ImageSearch/";
+  private static final int PRELOAD_COUNT = 6;
 
   private GoogleImageSearchApi mGoogleImageSearchApi;
   private TiqavApi mTiqavApi;
@@ -340,7 +341,7 @@ public class ImageGridFragment
 
   @Override
   public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-    boolean isLastItemVisible = totalItemCount == firstVisibleItem + visibleItemCount;
+    boolean isLastItemVisible = ((totalItemCount - PRELOAD_COUNT) <= (firstVisibleItem + visibleItemCount));
     if (isLastItemVisible && !mIsLoading && mHasNext) {
       loadItems();
     }
