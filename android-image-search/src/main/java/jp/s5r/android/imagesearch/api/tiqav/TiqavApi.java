@@ -1,5 +1,6 @@
 package jp.s5r.android.imagesearch.api.tiqav;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import jp.s5r.android.imagesearch.api.BaseApi;
@@ -42,8 +43,12 @@ public class TiqavApi extends BaseApi {
       public void onSuccess(String content) {
         super.onSuccess(content);
         List<TiqavImageModel> response = getGson().fromJson(content, new TypeToken<List<TiqavImageModel>>(){}.getType());
-        if (response != null && mOnTiqavResponseListener != null) {
-          mOnTiqavResponseListener.onTiqavResponse(response);
+        if (response != null) {
+          if (mOnTiqavResponseListener != null) {
+            mOnTiqavResponseListener.onTiqavResponse(response);
+          }
+        } else {
+          BugSenseHandler.sendException(new Exception("TiqavResponse is null."));
         }
       }
 
@@ -52,6 +57,11 @@ public class TiqavApi extends BaseApi {
         super.onFailure(error);
         if (mOnTiqavResponseListener != null) {
           mOnTiqavResponseListener.onTiqavFailure();
+          if (error instanceof Exception) {
+            BugSenseHandler.sendException((Exception) error);
+          } else {
+            BugSenseHandler.sendException(new Exception(error));
+          }
         }
       }
     });

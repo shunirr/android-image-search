@@ -432,5 +432,7 @@ public class ImageGridFragment
       hideSoftKeyboard();
     }
     mHasNext = false;
+
+    Toast.makeText(getActivity(), R.string.failed_to_load_image_list, Toast.LENGTH_SHORT).show();
   }
 }

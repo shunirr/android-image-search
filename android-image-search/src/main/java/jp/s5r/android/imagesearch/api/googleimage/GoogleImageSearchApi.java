@@ -1,5 +1,6 @@
 package jp.s5r.android.imagesearch.api.googleimage;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import jp.s5r.android.imagesearch.api.BaseApi;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseModel;
@@ -55,8 +56,12 @@ public class GoogleImageSearchApi extends BaseApi {
       public void onSuccess(String content) {
         super.onSuccess(content);
         ResponseModel response = getGson().fromJson(content, ResponseModel.class);
-        if (response != null && mOnGoogleImageResponseListener != null) {
-          mOnGoogleImageResponseListener.onGoogleImageResponse(response);
+        if (response != null) {
+          if (mOnGoogleImageResponseListener != null) {
+            mOnGoogleImageResponseListener.onGoogleImageResponse(response);
+          }
+        } else {
+          BugSenseHandler.sendException(new Exception("GoogleImageResponse is null."));
         }
       }
 
@@ -65,6 +70,11 @@ public class GoogleImageSearchApi extends BaseApi {
         super.onFailure(error);
         if (mOnGoogleImageResponseListener != null) {
           mOnGoogleImageResponseListener.onGoogleImageFailure();
+          if (error instanceof Exception) {
+            BugSenseHandler.sendException((Exception) error);
+          } else {
+            BugSenseHandler.sendException(new Exception(error));
+          }
         }
       }
     });

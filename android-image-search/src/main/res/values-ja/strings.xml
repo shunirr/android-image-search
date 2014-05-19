@@ -7,4 +7,5 @@
     <string name="config_save_gallery">ギャラリーに保存する</string>
     <string name="searchview_hint">検索</string>
     <string name="config_use_suggestion">サジェストを有効にする</string>
+    <string name="failed_to_load_image_list">画像一覧の取得に失敗しました</string>
 </resources>

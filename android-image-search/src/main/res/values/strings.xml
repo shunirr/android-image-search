@@ -7,4 +7,5 @@
     <string name="config_save_gallery">Save Gallery</string>
     <string name="searchview_hint">Search</string>
     <string name="config_use_suggestion">Use Suggestion</string>
+    <string name="failed_to_load_image_list">Failed to load image list.</string>
 </resources>

@@ -1,5 +1,6 @@
 package jp.s5r.android.imagesearch.api.googlesuggest;
 
+import com.bugsense.trace.BugSenseHandler;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import org.w3c.dom.Document;
@@ -53,12 +54,17 @@ public class GoogleSuggestApi {
 
         try {
           List<String> results = parseXml(content);
-          if (results != null && mOnGoogleSuggestResponseListener != null) {
-            mOnGoogleSuggestResponseListener.onGoogleSuggestResponse(results);
+          if (results != null) {
+            if (mOnGoogleSuggestResponseListener != null) {
+              mOnGoogleSuggestResponseListener.onGoogleSuggestResponse(results);
+            }
+          } else {
+            BugSenseHandler.sendException(new Exception("GoogleSuggestResponse is null."));
           }
         } catch (Exception e) {
           if (mOnGoogleSuggestResponseListener != null) {
             mOnGoogleSuggestResponseListener.onGoogleSuggestFailure();
+            BugSenseHandler.sendException(e);
           }
         }
       }
@@ -68,6 +74,11 @@ public class GoogleSuggestApi {
         super.onFailure(error);
         if (mOnGoogleSuggestResponseListener != null) {
           mOnGoogleSuggestResponseListener.onGoogleSuggestFailure();
+          if (error instanceof Exception) {
+            BugSenseHandler.sendException((Exception) error);
+          } else {
+            BugSenseHandler.sendException(new Exception(error));
+          }
         }
       }
     });
