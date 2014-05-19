@@ -315,14 +315,15 @@ public class ImageGridFragment
     }
 
     File path = new File(mCacheDir, System.currentTimeMillis() + ".jpg");
-    if (mIsIntentCaptureMode && mSaveFile != null) {
-      path = mSaveFile;
-    }
     try {
       ImageUtil.saveImage(path, bitmap);
       Uri uri = Uri.fromFile(path);
       if (Config.saveGallery(getActivity())) {
         uri = ImageUtil.addGarally(getActivity(), path, mCurrentQuery);
+      }
+
+      if (mIsIntentCaptureMode && mSaveFile != null) {
+        ImageUtil.saveImage(mSaveFile, bitmap);
       }
 
       if (mIsIntentPickerMode) {
