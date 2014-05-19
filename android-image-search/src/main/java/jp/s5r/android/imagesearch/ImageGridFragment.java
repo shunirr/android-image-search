@@ -41,6 +41,7 @@ import android.widget.SearchView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.List;
 
@@ -52,7 +53,10 @@ public class ImageGridFragment
              AbsListView.OnScrollListener,
              TiqavApi.OnTiqavResponseListener {
 
-  private static final String CACHE_DIR = Environment.getExternalStorageDirectory() + "/Pictures/ImageSearch/";
+  private static final String CACHE_DIR =
+      Environment.getExternalStorageDirectory() + "/Pictures/ImageSearch/";
+  private static final String INVISIBLE_CACHE_DIR =
+      Environment.getExternalStorageDirectory() + "/Pictures/.ImageSearch/";
   private static final int PRELOAD_COUNT = 6;
 
   private GoogleImageSearchApi mGoogleImageSearchApi;
@@ -61,7 +65,6 @@ public class ImageGridFragment
   private ImageGridAdapter mGridAdapter;
   private boolean mIsIntentPickerMode;
   private boolean mIsIntentCaptureMode;
-  private File mCacheDir;
   private File mSaveFile;
 
   private boolean mIsLoading;
@@ -93,7 +96,26 @@ public class ImageGridFragment
     if (!cacheDir.exists()) {
       cacheDir.mkdirs();
     }
-    mCacheDir = cacheDir;
+    File invisibleCacheDir = new File(INVISIBLE_CACHE_DIR);
+    if (!invisibleCacheDir.exists()) {
+      invisibleCacheDir.mkdirs();
+    } else {
+      removeAllImages(invisibleCacheDir);
+    }
+  }
+
+  private void removeAllImages(File dir) {
+    File[] images = dir.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String filename) {
+        return filename.indexOf(".jpg") > 0;
+      }
+    });
+    if (images != null && images.length > 0) {
+      for (File image : images) {
+        image.delete();
+      }
+    }
   }
 
   @Override
@@ -314,7 +336,12 @@ public class ImageGridFragment
       mProgressDialog = null;
     }
 
-    File path = new File(mCacheDir, System.currentTimeMillis() + ".jpg");
+    File path;
+    if (Config.saveGallery(getActivity())) {
+      path = new File(CACHE_DIR, System.currentTimeMillis() + ".jpg");
+    } else {
+      path = new File(INVISIBLE_CACHE_DIR, System.currentTimeMillis() + ".jpg");
+    }
     try {
       ImageUtil.saveImage(path, bitmap);
       Uri uri = Uri.fromFile(path);
