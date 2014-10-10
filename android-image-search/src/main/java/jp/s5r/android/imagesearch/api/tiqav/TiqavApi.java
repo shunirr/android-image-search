@@ -1,8 +1,9 @@
 package jp.s5r.android.imagesearch.api.tiqav;
 
-import com.bugsense.trace.BugSenseHandler;
 import com.google.gson.reflect.TypeToken;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.splunk.mint.Mint;
+
 import jp.s5r.android.imagesearch.api.BaseApi;
 import jp.s5r.android.imagesearch.api.tiqav.model.TiqavImageModel;
 
@@ -48,7 +49,7 @@ public class TiqavApi extends BaseApi {
             mOnTiqavResponseListener.onTiqavResponse(response);
           }
         } else {
-          BugSenseHandler.sendException(new Exception("TiqavResponse is null."));
+          Mint.logException(new Exception("TiqavResponse is null."));
         }
       }
 
@@ -58,9 +59,9 @@ public class TiqavApi extends BaseApi {
         if (mOnTiqavResponseListener != null) {
           mOnTiqavResponseListener.onTiqavFailure();
           if (error instanceof Exception) {
-            BugSenseHandler.sendException((Exception) error);
+            Mint.logException((Exception) error);
           } else {
-            BugSenseHandler.sendException(new Exception(error));
+            Mint.logException(new Exception(error));
           }
         }
       }

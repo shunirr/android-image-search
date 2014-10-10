@@ -1,11 +1,11 @@
 package jp.s5r.android.imagesearch;
 
-import com.bugsense.trace.BugSenseHandler;
 import com.nostra13.universalimageloader.cache.disc.impl.TotalSizeLimitedDiscCache;
 import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.utils.StorageUtils;
+import com.splunk.mint.Mint;
 
 import android.app.Application;
 
@@ -14,7 +14,7 @@ public class MyApplication extends Application {
   public void onCreate() {
     super.onCreate();
 
-    BugSenseHandler.initAndStartSession(this, "0fc599a9");
+    Mint.initAndStartSession(this, "0fc599a9");
 
     ImageLoaderConfiguration config =
       new ImageLoaderConfiguration.Builder(getApplicationContext())

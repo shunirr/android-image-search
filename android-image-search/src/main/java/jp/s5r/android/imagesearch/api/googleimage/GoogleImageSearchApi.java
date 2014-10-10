@@ -1,7 +1,8 @@
 package jp.s5r.android.imagesearch.api.googleimage;
 
-import com.bugsense.trace.BugSenseHandler;
 import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.splunk.mint.Mint;
+
 import jp.s5r.android.imagesearch.api.BaseApi;
 import jp.s5r.android.imagesearch.api.googleimage.model.ResponseModel;
 
@@ -61,7 +62,7 @@ public class GoogleImageSearchApi extends BaseApi {
             mOnGoogleImageResponseListener.onGoogleImageResponse(response);
           }
         } else {
-          BugSenseHandler.sendException(new Exception("GoogleImageResponse is null."));
+          Mint.logException(new Exception("GoogleImageResponse is null."));
         }
       }
 
@@ -71,9 +72,9 @@ public class GoogleImageSearchApi extends BaseApi {
         if (mOnGoogleImageResponseListener != null) {
           mOnGoogleImageResponseListener.onGoogleImageFailure();
           if (error instanceof Exception) {
-            BugSenseHandler.sendException((Exception) error);
+            Mint.logException((Exception) error);
           } else {
-            BugSenseHandler.sendException(new Exception(error));
+            Mint.logException(new Exception(error));
           }
         }
       }
