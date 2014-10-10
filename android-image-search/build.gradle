@@ -3,7 +3,6 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.8.+'
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.2'
     }
 }
@@ -12,11 +11,12 @@ apply plugin: 'android-apt'
 
 repositories {
     mavenCentral()
+    maven { url "https://mint.splunk.com/gradle/" }
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.3"
+    compileSdkVersion 20
+    buildToolsVersion "20.0.0"
 
     defaultConfig {
         minSdkVersion 14
@@ -44,6 +44,8 @@ dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.loopj.android:android-async-http:1.4.4'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.1'
+
+    compile "com.splunk.mint:mint:4.0.2"
 
     compile fileTree(dir: 'libs', include: '*.jar')
 }
