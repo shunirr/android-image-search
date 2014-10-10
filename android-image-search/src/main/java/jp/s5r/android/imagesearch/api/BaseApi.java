@@ -9,6 +9,7 @@ public abstract class BaseApi {
 
   protected BaseApi() {
     mAsyncHttpClient = new AsyncHttpClient();
+    mAsyncHttpClient.setMaxRetriesAndTimeout(3, 10);
     mGson = new Gson();
   }
 
