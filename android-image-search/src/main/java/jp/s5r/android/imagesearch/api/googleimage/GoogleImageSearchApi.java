@@ -14,7 +14,7 @@ public class GoogleImageSearchApi extends BaseApi {
   private static final String API_VERSION = "1.0";
   private static final String DEFAULT_COUNT = "8";
 
-  private static final String SCHEME = "https";
+  private static final String SCHEME = "http";
   private static final String HOST = "ajax.googleapis.com";
   private static final String PATH = "/ajax/services/search/images";
   private static final String PARAM_VERSION = "v";
