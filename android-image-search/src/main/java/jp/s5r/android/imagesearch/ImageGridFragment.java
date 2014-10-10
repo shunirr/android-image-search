@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,10 +54,8 @@ public class ImageGridFragment
              AbsListView.OnScrollListener,
              TiqavApi.OnTiqavResponseListener {
 
-  private static final String CACHE_DIR =
-      Environment.getExternalStorageDirectory() + "/Pictures/ImageSearch/";
-  private static final String INVISIBLE_CACHE_DIR =
-      Environment.getExternalStorageDirectory() + "/Pictures/.ImageSearch/";
+  private static final String CACHE_DIR = "/ImageSearch/";
+  private static final String INVISIBLE_CACHE_DIR = "/.ImageSearch/";
   private static final int PRELOAD_COUNT = 6;
 
   private GoogleImageSearchApi mGoogleImageSearchApi;
@@ -78,6 +77,9 @@ public class ImageGridFragment
   @InjectView(R.id.grid)
   GridView mGridView;
 
+  private File mCacheDir;
+  private File mInvisibleCacheDir;
+
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View rootView = inflater.inflate(R.layout.fragment_main, container, false);
@@ -92,15 +94,23 @@ public class ImageGridFragment
   }
 
   private void initCacheDir() {
-    File cacheDir = new File(CACHE_DIR);
-    if (!cacheDir.exists()) {
-      cacheDir.mkdirs();
+    File baseDir = null;
+    File[] dirs = ContextCompat.getExternalFilesDirs(getActivity(), null);
+    if (dirs != null && dirs.length > 0) {
+      baseDir = dirs[0];
     }
-    File invisibleCacheDir = new File(INVISIBLE_CACHE_DIR);
-    if (!invisibleCacheDir.exists()) {
-      invisibleCacheDir.mkdirs();
-    } else {
-      removeAllImages(invisibleCacheDir);
+
+    if (baseDir != null) {
+      mCacheDir = new File(baseDir, CACHE_DIR);
+      if (!mCacheDir.exists()) {
+        mCacheDir.mkdirs();
+      }
+      mInvisibleCacheDir = new File(baseDir, INVISIBLE_CACHE_DIR);
+      if (!mInvisibleCacheDir.exists()) {
+        mInvisibleCacheDir.mkdirs();
+      } else {
+        removeAllImages(mInvisibleCacheDir);
+      }
     }
   }
 
@@ -156,7 +166,7 @@ public class ImageGridFragment
       c = cr.query(
         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
         new String[] {BaseColumns._ID, MediaStore.Images.Media.DATA},
-        MediaStore.Images.Media.DATA + " like '%" + CACHE_DIR + "%'",
+        MediaStore.Images.Media.DATA + " like '%" + mCacheDir + "%'",
         null,
         "_id DESC");
 
@@ -338,9 +348,9 @@ public class ImageGridFragment
 
     File path;
     if (Config.saveGallery(getActivity())) {
-      path = new File(CACHE_DIR, System.currentTimeMillis() + ".jpg");
+      path = new File(mCacheDir, System.currentTimeMillis() + ".jpg");
     } else {
-      path = new File(INVISIBLE_CACHE_DIR, System.currentTimeMillis() + ".jpg");
+      path = new File(mInvisibleCacheDir, System.currentTimeMillis() + ".jpg");
     }
     try {
       ImageUtil.saveImage(path, bitmap);
