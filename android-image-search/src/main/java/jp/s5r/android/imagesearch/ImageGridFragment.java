@@ -275,7 +275,7 @@ public class ImageGridFragment
   public void onItemClick(ImageModel result) {
     getMainActivity().hideSuggestionList();
 
-    ImagePreviewDialogFragment dialog = new ImagePreviewDialogFragment(result);
+    ImagePreviewDialogFragment dialog = ImagePreviewDialogFragment.newInstance(result);
     dialog.setOnDialogButtonListener(new ImagePreviewDialogFragment.OnDialogButtonListener() {
       @Override
       public void onClickShare(ImageModel model) {

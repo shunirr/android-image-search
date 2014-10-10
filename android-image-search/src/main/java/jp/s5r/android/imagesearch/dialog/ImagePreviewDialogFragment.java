@@ -24,12 +24,18 @@ public class ImagePreviewDialogFragment extends DialogFragment implements ImageL
     void onClickCancel(ImageModel model);
   }
 
-  private final ImageModel mImageModel;
+  private ImageModel mImageModel;
 
   private ImageView mImageView;
   private OnDialogButtonListener mOnDialogButtonListener;
 
-  public ImagePreviewDialogFragment(ImageModel imageModel) {
+  public static ImagePreviewDialogFragment newInstance(ImageModel imageModel) {
+    ImagePreviewDialogFragment dialog = new ImagePreviewDialogFragment();
+    dialog.setImageModel(imageModel);
+    return dialog;
+  }
+
+  public void setImageModel(final ImageModel imageModel) {
     mImageModel = imageModel;
   }
 
